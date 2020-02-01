@@ -7,7 +7,6 @@ exports.verifyToken = (req, res, next) => {
       if (err) return next(err);
       req.user = {
         userid: decoded.userid,
-        email: decoded.email,
         token,
         username: decoded.username,
         isadmin: decoded.isadmin
