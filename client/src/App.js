@@ -4,7 +4,7 @@ import { Provider } from "react-redux";
 
 //relative imports
 
-import Home from "./components/Home";
+import Home from "./containers/Home";
 import store from "./store";
 import "bulma/css/bulma.css";
 import "./stylesheets/style.scss";
