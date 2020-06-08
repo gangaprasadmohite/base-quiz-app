@@ -1,6 +1,9 @@
 import React from "react";
 import { connect } from "react-redux";
+import Loader from 'react-loaders'
 
+
+// relative
 import Quiz from "../components/Quiz";
 import Quizset from "../components/Quizset";
 
@@ -14,16 +17,16 @@ class ListQuizzes extends React.Component {
     return (
       <>
         {this.props.users ? (
-          <div className="wrapper2">
-            <div className="Tall-tile is-danger my_tall_tile">
-              <Quizset quizzesbyQuizsets={this.props.quizzesbyQuizsets} />
+          <div className="my_container2">
+            <div className=" my_tall_tile">
+              <Quizset />
             </div>
             <div>
               <Quiz
+                currentUser={this.props.currentUser}
                 getQuizId={this.props.getQuizId}
                 updateState={this.props.updateState}
                 isAdmin={this.props.isAdmin}
-                quizzes={this.props.quizzes}
               />
             </div>
             <div className="all_users_container">
@@ -36,7 +39,7 @@ class ListQuizzes extends React.Component {
             </div>
           </div>
         ) : (
-          ""
+          <Loader className="loader"  type="square-spin" />
         )}
       </>
     );
@@ -45,7 +48,7 @@ class ListQuizzes extends React.Component {
 
 function mapStateTorops({ users }) {
   return {
-    users: users.users.users
+    users: users.users && users.users.users
   };
 }
-export default connect(mapStateTorops)(ListQuizzes);
+export default connect(mapStateTorops)(ListQuizzes)

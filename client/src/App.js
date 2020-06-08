@@ -2,8 +2,6 @@ import React from "react";
 import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
 
-//relative imports
-
 import Home from "./containers/Home";
 import store from "./store";
 import "bulma/css/bulma.css";

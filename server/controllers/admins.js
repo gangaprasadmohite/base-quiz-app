@@ -1,54 +1,57 @@
-const express = require("express");
-const router = express.Router();
-const Admin = require('../models/admin');
-const jwt = require('jsonwebtoken');
+const Admin = require("../models/admin");
+const jwt = require("jsonwebtoken");
 
 module.exports = {
-create:router.post("/", (req, res, next) => {
-        Admin.create(req.body, (err, Admin) => {
-          if (err) return next(err);
-          if (!Admin) return res.json({ message: "no Admin found!", success: false });
-          res.json({ Admin, success: true });
-        });
-      }),
-      
-      
-      
-      login:router.post("/login", (req, res, next) => {
-        let { email, password } = req.body;
-        Admin.findOne({ email }, (err, admin) => {
-          if (err) return next(err);
-          if (!admin) return res.json({ success: false, message: "invalid Email!" });
-          admin.verifyPassword(password, (err, matched) => {
-            if (err) return next(err);
-            if (!matched)
-              return res
-                .status(422)
-                .json({ success: false, message: "invalid password" });
-            jwt.sign(
-              {
-                userid: admin._id,
-                username: admin.username,
-                email: admin.email,
-                isadmin: admin.isAdmin
-              },
-              "secret",
-              (err, token) => {
-                if (err) return next(err);
-                res.json({ success: true, message: "you are logged in", token });
-              }
-            );
-          });
-        });
-      }),
-      
-      
-      listAdmins:router.get("/", (req, res, next) => {
-        Admin.find({}, "-password", (err, admins) => {
-          if (err) return next(err);
-          if (!admins)
-            return res.json({ success: false, message: "no admins found!" });
-          res.json({ admins, success: true });
-        });
-      })
+  create: async (req, res, next) => {
+    try {
+      let admin = await Admin.create(req.body);
+      if (!admin)
+        return res.json({ message: "can't create Admin", success: false });
+      res.json({ admin, success: true });
+    } catch (err) {
+      return next(err);
     }
+  },
+// login Admin
+
+  login: async (req, res, next) => {
+    let { email, password } = req.body;
+    try {
+      let user = await Admin.findOne({ email });
+      if (!user) return res.json({ success: false, message: "Invalid Email!" });
+      user.verifyPassword(password, (err, matched) => {
+        if (err) return next(err);
+        if (!matched)
+          return res.json({ success: false, message: "Invalid Password!" });
+
+        jwt.sign(
+          {
+            userid: user._id,
+            username: user.username,
+            email: user.email,
+            isadmin: user.isAdmin
+          },
+          "secret",
+          (err, token) => {
+            if (err) return next(err);
+            res.json({ success: true, message: "you are logged in", token });
+          }
+        );
+      });
+    } catch (err) {
+      return next(err);
+    }
+  },
+
+//list al admins
+  listAdmins: async (req, res, next) => {
+    try {
+      let admins = await Admin.find({}, "-password");
+      if (!admins)
+        return res.json({ success: false, message: "admins not found!" });
+      res.json({ admins, success: true });
+    } catch (err) {
+      return next(err);
+    }
+  }
+};

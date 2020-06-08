@@ -1,109 +1,89 @@
-const express = require("express");
-const router = express.Router();
 const Question = require("../models/question");
 const Quizset = require("../models/quizset");
 
 module.exports = {
-listQuizzes :router.get("/", (req, res, next) => {
-    Quiz.find({})
-      .populate("author", "-password")
-      .exec((err, quizzes) => {
-        if (err) return next(err);
-        if (!quizzes)
-          return res.json({ success: false, message: "No quizzes found!" });
-        res.json({ quizzes, success: true });
-      });
-  }),
+  
+  // list all quizes
 
-  
-  
-  create:router.post("/", (req, res, next) => {
-    const adminid = req.user.userid;
-    Quiz.create(req.body, (err, quizToCreate) => {
-      if (err) return next(err);
-      if (!quizToCreate)
-        return res.json({ success: false, message: "No Quiz found!" });
-      Quiz.findByIdAndUpdate(
-        quizToCreate._id,
-        { author: adminid },
-        (err, updatedQuiz) => {
-          if (err) return next(err);
-          if (!updatedQuiz)
-            return res.json({ success: false, message: "admin not found!" });
-        }
-      );
-      Quizset.findOne({ topic: quizToCreate.quizset }, (err, quizset) => {
+  listQuizzes: (req, res, next) => {
+    Question.find({})
+      .populate("author", "-password")
+      .exec((err, questions) => {
         if (err) return next(err);
-        if (!quizset) {
-          Quizset.create(
-            { $push: { quiz: quizToCreate._id }, topic: quizToCreate.quizset },
-            { new: true },
-            (err, createdQuizset) => {
-              if (err) return next(err);
-            }
-          );
-        } else if (quizset) {
-          Quizset.findByIdAndUpdate(
-            quizset._id,
-            { $push: { quiz: quizToCreate._id } },
-            { new: true },
-            (err, createdQuizset) => {
-              if (err) return next(err);
-            }
-          );
-        }
+        if (!questions)
+          return res.json({ success: false, message: "No quizzes found!" });
+        res.json({ questions, success: true });
       });
-      res.status(200).json({
-        success: true,
-        message: "Quiz created!",
-        quizToCreate
-      });
-    });
-  }),
-  
-  quiz:router.get("/:id", (req, res, next) => {
+  },
+
+  // only admins can access
+
+  // get a quiz
+
+  quiz: async (req, res, next) => {
     const id = req.params.id;
-    Quiz.findById(id, (err, quiz) => {
-      if (err) return next(err);
-      if (!quiz) return res.json({ success: false, message: "quiz not found!" });
-      res.json({ success: true, quiz });
-    });
-  }),
-  
-  
-  
-  
-  update:router.put("/:id", (req, res, next) => {
+    try {
+      let question = await Question.findById(id);
+      if (!question)
+        return res.json({ success: false, message: "question not found!" });
+      res.json({ success: true, question });
+    } catch (err) {
+      return next(err);
+    }
+  },
+
+  //get question
+
+  questions: async (req, res, next) => {
+    const topic = req.params.topic;
+    try {
+      let questions = await Question.find({ quizset: topic });
+      if (!questions)
+        return res.json({ success: false, message: "No questions found!" });
+      res.json({ success: true, questions });
+    } catch (err) {
+      return next(err);
+    }
+  },
+
+  //update quiz
+
+  update: async (req, res, next) => {
     const id = req.params.id;
-    Quiz.findByIdAndUpdate(id, req.body, (err, quizToUpdate) => {
-      if (err) return next(err);
-      if (!quizToUpdate)
+    try {
+      let question = await Question.findByIdAndUpdate(id, req.body);
+      if (!question)
+        return res.json({ success: false, message: "question not found!" });
+      res.json({ success: true, question });
+    } catch (err) {
+      return next(err);
+    }
+  },
+
+  //delete a quiz
+
+  delete: async (req, res, next) => {
+    const id = req.params.id;
+    try {
+      let questionToDelete = await Question.findByIdAndDelete(id);
+      if (!questionToDelete)
         return res.json({ success: false, message: "quiz not found!" });
-      res.json({ success: true, quizToUpdate });
-    });
-  }),
-  
-  
-  delete:router.delete("/:id", (req, res, next) => {
-    const id = req.params.id;
-    Quiz.findByIdAndDelete(id, (err, quizToDelete) => {
-      if (err) return next(err);
-      if (!quizToDelete)
-        return res.json({ success: false, message: "quiz not found!" });
-      Quizset.findOneAndUpdate(
-        { topic: quizToDelete.quizset },
-        { $pull: { quiz: quizToDelete._id } },
-        (err, updatedQuizset) => {
-          if (err) return next(err);
-          if (!updatedQuizset)
-            return res.json({ success: false, message: "can't update Quizset" });
-        }
+      let quizsetToUpdate = await Quizset.findOneAndUpdate(
+        { topic: questionToDelete.quizset },
+        { $pull: { questions: questionToDelete._id } }
       );
+      if (!quizsetToUpdate)
+        return res.json({
+          success: false,
+          message: "can't update Quizset"
+        });
       res.json({
         success: true,
-        message: "Quiz Deleted!",
-        quizToDelete
+        message: "succesfully deleted quiz",
+        questionToDelete
       });
-    });
-  })
-}
+    } catch (err) {
+      return next(err);
+    }
+  }
+};

@@ -5,8 +5,24 @@ const User = require("../../controllers/user");
 
 router.use(auth.verifyToken);
 
-router.get("/", User.loggedInUser);
+// get current logged user
 
-router.put("/", User.update);
+router.get("/", User.loggedUser);
+
+//update score
+
+router.put("/", User.updateScore);
+
+//update user
+
+router.patch("/", User.updateUser);
+
+//scores
+
+router.get("/scores", User.getScores);
+
+//score
+
+router.get("/score", User.getscore);
 
 module.exports = router;

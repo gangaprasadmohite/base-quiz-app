@@ -6,7 +6,7 @@ const publicHeader = () => {
     <>
       <div className="navbar-start">
         <Link className="navbar-item" to="/">
-          Base Quiz
+          Base Quiz App
         </Link>
       </div>
 
@@ -20,7 +20,7 @@ const publicHeader = () => {
               Log in
             </Link>
             <Link
-              className="button is-light "
+              className="button is-light my_admin_button"
               to="/admins/login"
             >
               Admin
@@ -31,13 +31,12 @@ const publicHeader = () => {
     </>
   );
 };
-
 const protectedHeader = isAdmin => {
   return (
     <>
       <div className="navbar-start">
         <Link className="navbar-item" to="/">
-          Home
+        QuizApp
         </Link>
         {isAdmin ? (
           <Link className="navbar-item" to="/quizzes/new">
@@ -53,7 +52,7 @@ const protectedHeader = isAdmin => {
       </div>
       <div className="navbar-end">
         <div className="navbar-item">
-          <Link className="button is-success is-outlined" to="/user">
+          <Link className="button is-primary my_admin_button" to="/user">
             <strong>{isAdmin ? `Admin` : `User`}</strong>
           </Link>
         </div>
@@ -61,7 +60,6 @@ const protectedHeader = isAdmin => {
     </>
   );
 };
-
 const Header = props => {
   return (
     <>
@@ -75,5 +73,4 @@ const Header = props => {
     </>
   );
 };
-
-export default Header;
+export default Header

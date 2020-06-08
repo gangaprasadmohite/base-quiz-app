@@ -1,16 +1,28 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const quizsetSchema = new Schema({
-  quiz: {
-    type: [Schema.Types.ObjectId],
-    required: true,
-    ref: "Quiz"
+const quizsetSchema = new Schema(
+  {
+    questions: [
+      {
+        type: Schema.Types.ObjectId,
+        required: true,
+        ref: "Question"
+      }
+    ],
+    topic: {
+      type: String,
+      unique: true
+    },
+    completedByUsers: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User"
+      }
+    ]
   },
-  topic: {
-    type: String
-  }
-});
+  { timestamps: true }
+);
 
 const Quizset = mongoose.model("Quizset", quizsetSchema);
 
